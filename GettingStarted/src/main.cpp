@@ -20,6 +20,10 @@
 // External headers
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+// OpenGL Mathematics 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // Own headers
 #include "internal/shader.h"
@@ -105,7 +109,7 @@ int main(void)
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
     // build and compile Shader progam
-    Shader ourShader("/home/jjjurado/Dev/MyOpenGL/resources/shaders/textures.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/textures.fs");
+    Shader ourShader("/home/jjjurado/Dev/MyOpenGL/resources/shaders/transform.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/transform.fs");
     
     // #################################################
     // ################### Textures ####################
@@ -169,6 +173,16 @@ int main(void)
     ourShader.use(); // activate the shaderProgram to setting uniforms
     ourShader.setInt("textureSampler", 0); // texture unit0
     ourShader.setInt("textureSampler2", 1); // texture unit1
+
+    // #################################################
+    // ############### Transformations #################
+    // #################################################
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
+    ourShader.use();
+    ourShader.setMat4("transform", trans);
+
 
     // #################################################
     // ##################### Loop ######################
