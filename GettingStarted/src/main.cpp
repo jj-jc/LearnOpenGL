@@ -17,6 +17,10 @@
 // Standard headers
 #include <iostream>
 
+// External headers
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 // Own headers
 #include "internal/shader.h"
 
@@ -62,7 +66,9 @@ int main(void)
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
-
+    // #################################################
+    // ################ OpenGLObjects ##################
+    // #################################################
     /* Definitions of objects */
     float vertices[] = {
         // vertices          // colors           // texture coords
@@ -95,14 +101,42 @@ int main(void)
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     // // Texture coords 
-    // glEnableVertexAttribArray(2);
-    // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
     // build and compile Shader progam
-    Shader ourShader("/home/jjjurado/Dev/MyOpenGL/resources/shaders/shader.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/shader.fs");
+    Shader ourShader("/home/jjjurado/Dev/MyOpenGL/resources/shaders/texture.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/texture.fs");
     
+    // #################################################
+    // ################### Textures ####################
+    // #################################################
+    // Create, wraps/filters texture object
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Load the image 
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("/home/jjjurado/Dev/MyOpenGL/resources/textures/container.jpg", &width, &height, &nrChannels, 0);
+    if(data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture\n";
+    }
+    stbi_image_free(data);
 
 
+    // #################################################
+    // ##################### Loop ######################
+    // #################################################
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -114,14 +148,12 @@ int main(void)
     	glClear(GL_COLOR_BUFFER_BIT);
 
         ourShader.use();
-
+        glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window); // Swap front and back buffers
         glfwPollEvents(); // Poll for and process events
     }
-
-
     glfwTerminate(); // Close OpenGlL window and terminate GLFW
     exit(EXIT_SUCCESS);
 }
