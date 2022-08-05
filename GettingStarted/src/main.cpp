@@ -31,6 +31,10 @@
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+// camera system variables
+static glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+static glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+static glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -228,7 +232,8 @@ int main(void)
     model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     // view
     glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
+    // view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
+
     // projection
     glm::mat4 projection = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/SCR_HEIGHT, 0.1f, 100.0f);
@@ -251,13 +256,6 @@ int main(void)
         glm::vec3( 1.5f,  0.2f, -1.5f), 
         glm::vec3(-1.3f,  1.0f, -1.5f)  
     };
-
-    
-    // #################################################
-    // ################# Time manage ###################
-    // #################################################
-    double currentTime = 0.0f;
-    double lastTime = 0.0f;
 
     // #################################################
     // ##################### Loop ######################
@@ -296,6 +294,10 @@ int main(void)
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+        view = glm::lookAt(cameraPos,     // position
+                    cameraFront,    // target
+                    cameraUp);   // up vector respectively
+        ourShader.setMat4("view", view);
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window); // Swap front and back buffers
@@ -309,8 +311,17 @@ int main(void)
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
+    const float cameraSpeed = 0.05f; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;    
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
