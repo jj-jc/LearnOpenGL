@@ -938,6 +938,7 @@ gradle-app.setting
 # gradle/wrapper/gradle-wrapper.properties
 
 ##### CMake
+
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
@@ -1045,3 +1046,4 @@ dkms.conf
 *.uf2
 # Raspberry Pi Pico disassembler file
 *.dis
+
