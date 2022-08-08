@@ -388,8 +388,10 @@ int main(void)
 
         // Light Source
         lightSourceShader.use();
+        glm::vec3 lightPos = glm::vec3(1.2f, 0.0f, 0.0f);
         glm::mat4 modelLightSource = glm::mat4(1.0f);
-        glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
+        // modelLightSource = glm::rotate(modelLightSource, glm::radians(glm::cos(glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));        
+        modelLightSource = glm::rotate(modelLightSource, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
         modelLightSource = glm::translate(modelLightSource, lightPos);
         modelLightSource = glm::scale(modelLightSource, glm::vec3(0.2f));
         lightSourceShader.setMat4("model", modelLightSource);
@@ -409,7 +411,7 @@ int main(void)
         lightShader.setMat4("projection", projection);
         lightShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
         lightShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-        lightShader.setVec3("lightPos", lightPos);
+        lightShader.setVec3("lightPos", glm::vec3(modelLightSource * glm::vec4(lightPos, 1.0f)));
         lightShader.setVec3("viewPos", camera.Position);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 

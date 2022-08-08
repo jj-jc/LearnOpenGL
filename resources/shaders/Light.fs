@@ -22,7 +22,7 @@ void main()
     float specularStrength = 0.5;
     vec3 viewDir = normalize(viewPos - fragmentPos);
     vec3 reflectionDir = reflect(-lightDir, fragmentNorm);
-    vec3 specular = specularStrength * pow(max(dot(viewDir, reflectionDir), 0), 32) * lightColor; // shininess of n = 32 higher -> brighter (2, 4, 8, 16, 32, 64, 128, 256);
+    vec3 specular = specularStrength * pow(max(dot(viewDir, reflectionDir), 0), 256) * lightColor; // shininess of n = 32 higher -> brighter (2, 4, 8, 16, 32, 64, 128, 256);
 
     // apply the lightning result with the 3 components
     vec3 result = (specular + ambient + diffuse) * objectColor;
