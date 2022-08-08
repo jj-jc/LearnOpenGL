@@ -406,7 +406,7 @@ int main(void)
         glm::mat4 modelCube = glm::mat4(1.0f);
         lightShader.setMat4("model", modelCube);
         glm::mat3 normalCube = glm::mat3(transpose(inverse(modelCube))); // normal matrix to transform the normal vectors into the world coordinates, this avoid translation and problems with non-uniform scale
-        lightShader.setMat3("normal", normalCube);
+        lightShader.setMat3("normal", normalCube); // from the world coordinates
         lightShader.setMat4("view", view);
         lightShader.setMat4("projection", projection);
         lightShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
