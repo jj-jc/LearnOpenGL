@@ -29,6 +29,8 @@
 #include "internal/shader.h"
 #include "internal/camera.h"
 
+// Debug 
+
 // #################################################
 // ############ Global variables ###################
 // #################################################
@@ -51,7 +53,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
+void loadGPUTexture(const char* path, unsigned int &textureID, GLenum textureUnit);
 
 
 int main(void)
@@ -79,7 +81,7 @@ int main(void)
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     // hide the cursor and capture it
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
@@ -111,35 +113,35 @@ int main(void)
 0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 1.0f,
 0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 1.0f,
 -0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,                 0.0f, 1.0f,
--0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,             0.0f, 0.0f,
+-0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,                 0.0f, 0.0f,
 
 -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,                 0.0f, 0.0f,
 0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 0.0f,
 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 1.0f,
 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 1.0f,
 -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,                 0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,             0.0f, 0.0f,
+-0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,                 0.0f, 0.0f,
 
--0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 0.0f,
--0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 1.0f,
--0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                 0.0f, 1.0f,
--0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                 0.0f, 1.0f,
--0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                 0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,             1.0f, 0.0f,
+-0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                1.0f, 0.0f,
+-0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                1.0f, 1.0f,
+-0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                0.0f, 1.0f,
+-0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                0.0f, 1.0f,
+-0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                0.0f, 0.0f,
+-0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                1.0f, 0.0f,
 
 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 0.0f,
 0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 1.0f,
 0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                 0.0f, 1.0f,
 0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                 0.0f, 1.0f,
 0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                 0.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,             1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,     1.0f, 0.0f,
 
 -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,                 0.0f, 1.0f,
 0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 1.0f,
 0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 0.0f,
 0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 0.0f,
 -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,                 0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,             0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,     0.0f, 1.0f,
 
 -0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,                 0.0f, 1.0f,
 0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,                 1.0f, 1.0f,
@@ -150,48 +152,48 @@ int main(void)
     };
 
     float cubeVertices[] = {
-            // vertices       
-        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, -1.0f,
-         0.5f, -0.5f, -0.5f,   0.0f, 0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,   0.0f, 0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,   0.0f, 0.0f, -1.0f,
-        -0.5f,  0.5f, -0.5f,   0.0f, 0.0f, -1.0f,
-        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, -1.0f,
+            // vertices         // normal vectors    // TextureCoords
+        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, -1.0f,   0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,   0.0f, 0.0f, -1.0f,   1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,   0.0f, 0.0f, -1.0f,   1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,   0.0f, 0.0f, -1.0f,   1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,   0.0f, 0.0f, -1.0f,   0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, -1.0f,   0.0f, 0.0f,
 
-        -0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,    0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,    1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,    0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,    0.0f, 0.0f,
 
-        -0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,    1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,    0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,    0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,    0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
 
-         0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,    1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,    0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,    0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,    0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
 
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,    0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,    1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,    1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,    1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,    0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,    0.0f, 1.0f,
 
-        -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  
-         0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  
-         0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 0.0f,  
-         0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 0.0f,  
-        -0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 0.0f,  
-        -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  
+        -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,    0.0f, 1.0f,  
+         0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,    1.0f, 1.0f,  
+         0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 0.0f,    1.0f, 0.0f,  
+         0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 0.0f,    1.0f, 0.0f,  
+        -0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 0.0f,    0.0f, 0.0f,  
+        -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,    0.0f, 1.0f
     };
 
     unsigned int elements[] = {  
@@ -233,69 +235,39 @@ int main(void)
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO); 
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
     Shader lightShader("/home/jjjurado/Dev/MyOpenGL/resources/shaders/Light.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/Light.fs");
     Shader lightSourceShader("/home/jjjurado/Dev/MyOpenGL/resources/shaders/LigthSource.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/LightSource.fs");
 
+    // Material shaders
+    Shader cubeMaterials("/home/jjjurado/Dev/MyOpenGL/resources/shaders/Materials.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/Materials.fs");    
+    // Material with light shaders
+    Shader cubeMaterialsLight("/home/jjjurado/Dev/MyOpenGL/resources/shaders/MaterialLight.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/MaterialLight.fs");
+    // Materials with lightning maps
+    Shader lightningMaps("/home/jjjurado/Dev/MyOpenGL/resources/shaders/LightningMaps.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/LightningMaps.fs");
+    
+    
     // #################################################
     // ################### Textures ####################
     // #################################################
     // Create, wraps/filters texture object 1
     // load and create a texture 
     // -------------------------
-    unsigned int texture1, texture2;
+    unsigned int texture1, texture2, texture3, texture4;
     // texture 1
-    // ---------
-    glGenTextures(1, &texture1);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1); 
-     // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-    unsigned char *data = stbi_load("/home/jjjurado/Dev/MyOpenGL/resources/textures/container.jpg", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
+    loadGPUTexture("/home/jjjurado/Dev/MyOpenGL/resources/textures/container.jpg", texture1, GL_TEXTURE0);
     // texture 2
-    // ---------
-    glGenTextures(1, &texture2);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    data = stbi_load("/home/jjjurado/Dev/MyOpenGL/resources/textures/awesomeface.png", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
+    loadGPUTexture("/home/jjjurado/Dev/MyOpenGL/resources/textures/awesomeface.png", texture2, GL_TEXTURE1);
+    // texture 3 
+    loadGPUTexture("/home/jjjurado/Dev/MyOpenGL/resources/textures/container2.png", texture3, GL_TEXTURE2);
+    // texture4
+    loadGPUTexture("/home/jjjurado/Dev/MyOpenGL/resources/textures/container2_specular.png", texture4, GL_TEXTURE3);
+
 
     // tell openGL for each sampler to which texture unit it belongs to
     ourShader.use(); // activate the shaderProgram to setting uniforms
@@ -356,7 +328,8 @@ int main(void)
         // bind textures on corresponding texture units
         glBindTexture(GL_TEXTURE_2D, texture1);
         glBindTexture(GL_TEXTURE_2D, texture2);
-
+        glBindTexture(GL_TEXTURE_2D, texture3);
+        glBindTexture(GL_TEXTURE_2D, texture4);
         // time
         // gl
 
@@ -388,10 +361,10 @@ int main(void)
 
         // Light Source
         lightSourceShader.use();
-        glm::vec3 lightPos = glm::vec3(1.2f, 0.0f, 0.0f);
+        glm::vec3 lightPos = glm::vec3(1.2f, 0.0f, 3.0f);
         glm::mat4 modelLightSource = glm::mat4(1.0f);
         // modelLightSource = glm::rotate(modelLightSource, glm::radians(glm::cos(glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));        
-        modelLightSource = glm::rotate(modelLightSource, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+        // modelLightSource = glm::rotate(modelLightSource, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
         modelLightSource = glm::translate(modelLightSource, lightPos);
         modelLightSource = glm::scale(modelLightSource, glm::vec3(0.2f));
         lightSourceShader.setMat4("model", modelLightSource);
@@ -415,6 +388,71 @@ int main(void)
         lightShader.setVec3("viewPos", camera.Position);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+    {
+        // Cube with Materials
+        glBindVertexArray(lightVAO);
+        cubeMaterials.use();
+        glm::mat4 modelCube = glm::mat4(1.0f);
+        modelCube = glm::translate(modelCube, glm::vec3(3.0f, 0.0f, 0.0f));
+        cubeMaterials.setMat4("model", modelCube);
+        glm::mat3 normalCube = glm::mat3(transpose(inverse(modelCube))); // normal matrix to transform the normal vectors into the world coordinates, this avoid translation and problems with non-uniform scale
+        cubeMaterials.setMat3("normal", normalCube); // from the world coordinates
+        cubeMaterials.setMat4("view", view);
+        cubeMaterials.setMat4("projection", projection);
+        cubeMaterials.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+        cubeMaterials.setVec3("lightPos", glm::vec3(modelLightSource * glm::vec4(lightPos, 1.0f)));
+        cubeMaterials.setVec3("viewPos", camera.Position);
+        cubeMaterials.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        cubeMaterials.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        cubeMaterials.setVec3("material.specular", 0.5f, 0.5f, 0.31f);
+        cubeMaterials.setFloat("material.shininess", 32.0f);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+
+    {
+        // Cube with Materials and LIght
+        glBindVertexArray(lightVAO);
+        cubeMaterialsLight.use();
+        glm::mat4 modelCube = glm::mat4(1.0f);
+        modelCube = glm::translate(modelCube, glm::vec3(1.5f, 0.0f, 0.0f));
+        cubeMaterialsLight.setMat4("model", modelCube);
+        glm::mat3 normalCube = glm::mat3(transpose(inverse(modelCube))); // normal matrix to transform the normal vectors into the world coordinates, this avoid translation and problems with non-uniform scale
+        cubeMaterialsLight.setMat3("normal", normalCube); // from the world coordinates
+        cubeMaterialsLight.setMat4("view", view);
+        cubeMaterialsLight.setMat4("projection", projection);
+        cubeMaterialsLight.setVec3("lightPos", glm::vec3(modelLightSource * glm::vec4(lightPos, 1.0f)));
+        cubeMaterialsLight.setVec3("viewPos", camera.Position);
+        cubeMaterialsLight.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        cubeMaterialsLight.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        cubeMaterialsLight.setVec3("material.specular", 0.5f, 0.5f, 0.31f);
+        cubeMaterialsLight.setFloat("material.shininess", 32.0f);
+        cubeMaterialsLight.setVec3("light.ambient", 0.2f, 0.0f, 0.0f);
+        cubeMaterialsLight.setVec3("light.diffuse", 0.5f, 0.0f, 0.0f);
+        cubeMaterialsLight.setVec3("light.specular", 1.0f, 0.0f, 0.0f);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+
+    {
+        // Cube with lightningMaps
+        glBindVertexArray(lightVAO);
+        lightningMaps.use();
+        glm::mat4 modelCube = glm::mat4(1.0f);
+        modelCube = glm::translate(modelCube, glm::vec3(4.5f, 0.0f, 0.0f));
+        lightningMaps.setMat4("model", modelCube);
+        glm::mat3 normalCube = glm::mat3(transpose(inverse(modelCube))); // normal matrix to transform the normal vectors into the world coordinates, this avoid translation and problems with non-uniform scale
+        lightningMaps.setMat3("normal", normalCube); // from the world coordinates
+        lightningMaps.setMat4("view", view);
+        lightningMaps.setMat4("projection", projection);
+        lightningMaps.setVec3("lightPos", glm::vec3(modelLightSource * glm::vec4(lightPos, 1.0f)));
+        lightningMaps.setVec3("viewPos", camera.Position);
+        lightningMaps.setInt("material.diffuse", 2);
+        lightningMaps.setInt("material.specular", 3);
+        lightningMaps.setFloat("material.shininess", 256.0f);
+        lightningMaps.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        lightningMaps.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+        lightningMaps.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -477,3 +515,35 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
 }
+
+
+// load textures simply
+void loadGPUTexture(const char* path, unsigned int &textureID, GLenum textureUnit)
+{
+
+    glGenTextures(1, &textureID);
+    glActiveTexture(textureUnit);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+}
+
+
