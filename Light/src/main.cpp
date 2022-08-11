@@ -273,6 +273,7 @@ int main(void)
     Shader cubeMaterialsLight("/home/jjjurado/Dev/MyOpenGL/resources/shaders/MaterialLight.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/MaterialLight.fs");
     // Materials with lightning maps
     Shader lightningMaps("/home/jjjurado/Dev/MyOpenGL/resources/shaders/LightningMaps.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/LightningMaps.fs");
+    Shader lightCasters("/home/jjjurado/Dev/MyOpenGL/resources/shaders/LightCasters.vs", "/home/jjjurado/Dev/MyOpenGL/resources/shaders/LightCasters.fs");
     
     
     // #################################################
@@ -475,6 +476,98 @@ int main(void)
         lightningMaps.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
         lightningMaps.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+
+    {   // Cube with lightningMaps and lightCasters
+        glBindVertexArray(lightVAO);
+        lightCasters.use();
+        glm::mat4 modelCube = glm::mat4(1.0f);
+        modelCube = glm::translate(modelCube, glm::vec3(7.0f, 0.0f, 0.0f));
+        lightCasters.setMat4("model", modelCube);
+        glm::mat3 normalCube = glm::mat3(transpose(inverse(modelCube))); // normal matrix to transform the normal vectors into the world coordinates, this avoid translation and problems with non-uniform scale
+        lightCasters.setMat3("normal", normalCube); // from the world coordinates
+        lightCasters.setMat4("view", view);
+        lightCasters.setMat4("projection", projection);
+        lightCasters.setVec3("viewPos", camera.Position);
+        lightCasters.setInt("material.diffuse", 2);
+        lightCasters.setInt("material.specular", 3);
+        lightCasters.setFloat("material.shininess", 256.0f);
+
+        lightCasters.setVec3("dirLight.direction", 0.0f, 0.0f, 1.0f);
+        lightCasters.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
+        lightCasters.setVec3("dirLight.diffuse", 0.3f, 0.3f, 0.3f);
+        lightCasters.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
+
+        lightCasters.setVec3("pointLight[0].position", 9.0f, 0.0f, -1.0f);
+        lightCasters.setVec3("pointLight[0].ambient", 0.2f, 0.2f, 0.2f);
+        lightCasters.setVec3("pointLight[0].diffuse", 0.5f, 0.5f, 0.5f);
+        lightCasters.setVec3("pointLight[0].specular", 1.0f, 1.0f, 1.0f);
+        lightCasters.setFloat("pointLight[0].constant", 1.0f);
+        lightCasters.setFloat("pointLight[0].linear", 0.7f);
+        lightCasters.setFloat("pointLight[0].quadratic", 1.8f);
+
+        lightCasters.setVec3("pointLight[1].position", 6.0f, 0.0f, -1.0f);
+        lightCasters.setVec3("pointLight[1].ambient", 0.2f, 0.2f, 0.2f);
+        lightCasters.setVec3("pointLight[1].diffuse", 0.5f, 0.5f, 0.5f);
+        lightCasters.setVec3("pointLight[1].specular", 1.0f, 1.0f, 1.0f);        
+        lightCasters.setFloat("pointLight[1].constant", 1.0f);
+        lightCasters.setFloat("pointLight[1].linear", 0.35f);
+        lightCasters.setFloat("pointLight[1].quadratic", 0.44f);
+
+        lightCasters.setVec3("spotLight.position", camera.Position);
+        lightCasters.setVec3("spotLight.direction", camera.Front);
+        lightCasters.setFloat("spotLight.cutOff", glm::cos(glm::radians(5.5f)));
+        lightCasters.setFloat("spotLight.outerOff", glm::cos(glm::radians(10.0f)));
+        lightCasters.setVec3("spotLight.ambient", 0.2f, 0.2f, 0.2f);
+        lightCasters.setVec3("spotLight.diffuse", 0.3f, 0.3f, 0.3f);
+        lightCasters.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);     
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        {   // Point Light 1
+            lightSourceShader.use();
+            glm::vec3 lightPos = glm::vec3(9.0f, 0.0f, -1.0f);
+            glm::mat4 modelLightSource = glm::mat4(1.0f);
+            // modelLightSource = glm::rotate(modelLightSource, glm::radians(glm::cos(glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));        
+            // modelLightSource = glm::rotate(modelLightSource, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+            modelLightSource = glm::translate(modelLightSource, lightPos);
+            modelLightSource = glm::scale(modelLightSource, glm::vec3(0.2f));
+            lightSourceShader.setMat4("model", modelLightSource);
+            lightSourceShader.setMat4("view", view);
+            lightSourceShader.setMat4("projection", projection);
+            glBindVertexArray(lightVAO);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+        {   // Point Light 2
+            lightSourceShader.use();
+            glm::vec3 lightPos = glm::vec3(6.0f, 0.0f, -1.0f);
+            glm::mat4 modelLightSource = glm::mat4(1.0f);
+            // modelLightSource = glm::rotate(modelLightSource, glm::radians(glm::cos(glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));        
+            // modelLightSource = glm::rotate(modelLightSource, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+            modelLightSource = glm::translate(modelLightSource, lightPos);
+            modelLightSource = glm::scale(modelLightSource, glm::vec3(0.2f));
+            lightSourceShader.setMat4("model", modelLightSource);
+            lightSourceShader.setMat4("view", view);
+            lightSourceShader.setMat4("projection", projection);
+            glBindVertexArray(lightVAO);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+        // { // spot light
+        //     lightSourceShader.use();
+        //     glm::vec3 lightPos = glm::vec3(7.0f, 0.0f, -2.0f);
+        //     glm::mat4 modelLightSource = glm::mat4(1.0f);
+        //     // modelLightSource = glm::rotate(modelLightSource, glm::radians(glm::cos(glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));        
+        //     // modelLightSource = glm::rotate(modelLightSource, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+        //     modelLightSource = glm::translate(modelLightSource, lightPos);
+        //     modelLightSource = glm::scale(modelLightSource, glm::vec3(0.2f));
+        //     lightSourceShader.setMat4("model", modelLightSource);
+        //     lightSourceShader.setMat4("view", view);
+        //     lightSourceShader.setMat4("projection", projection);
+        //     glBindVertexArray(lightVAO);
+        //     glDrawArrays(GL_TRIANGLES, 0, 36);
+        // }
+
     }
 
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
