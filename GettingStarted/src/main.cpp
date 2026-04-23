@@ -475,9 +475,11 @@ int main() {
     glfwMakeContextCurrent(window);
                                   
     // start GLEW extension handler
-    // glewExperimental = GL_TRUE;
-    // if(glewInit())
-        printf("There is a problem wirth glewInit.\n");
+    glewExperimental = GL_TRUE;
+    if(glewInit() != GLEW_OK) {
+        printf("There is a problem with glewInit.\n");
+        return 1;
+    }
         
 
     // get version info
@@ -501,7 +503,7 @@ int main() {
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float) height;
         glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
