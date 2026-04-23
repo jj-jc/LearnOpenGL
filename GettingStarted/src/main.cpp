@@ -455,6 +455,12 @@
 #include <GLFW/glfw3.h> // GLFW helper library
 #include <stdio.h>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include <glm/glm.hpp>
+#include <tracy/Tracy.hpp>
+
 int main() {
     // start GL context and O/S window using the GLFW helper library
     if (!glfwInit()) {
@@ -466,13 +472,14 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);*/    
-    GLFWwindow* window = glfwCreateWindow(640, 480, "Hello Triangle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Hello Triangle with ImGui", NULL, NULL);
     if (!window) {
       fprintf(stderr, "ERROR: could not open window with GLFW3\n");
       glfwTerminate();
       return 1;
     }
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(1); // Enable vsync
                                   
     // start GLEW extension handler
     glewExperimental = GL_TRUE;
@@ -492,17 +499,42 @@ int main() {
     glEnable(GL_DEPTH_TEST); // enable depth-testing
     glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
 
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 130");
+
     /* OTHER STUFF GOES HERE NEXT */
     while (!glfwWindowShouldClose(window))
     {
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
+        // Show a simple ImGui window
+        ImGui::Begin("Hello, LearnOpenGL!");
+        ImGui::Text("This window is powered by Dear ImGui.");
+        ImGui::End();
 
+        // Render ImGui
+        ImGui::Render();
         
         float ratio;
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float) height;
         glViewport(0, 0, width, height);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
@@ -518,9 +550,21 @@ int main() {
         glColor3f(0.f, 0.f, 1.f);
         glVertex3f(0.f, 0.6f, 0.f);
         glEnd();
+
+        // Draw ImGui over the top
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        FrameMark; // Tracy profiler frame mark
     }  
+
+    // Cleanup ImGui
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     // close GL context and any other GLFW resources
     glfwTerminate();
     return 0;
